@@ -9,6 +9,7 @@ use App\Http\Controllers\ZkTeco\MappingController;
 use App\Http\Controllers\ZkTeco\ReportController;
 use App\Http\Controllers\Hikvision\DeviceController as HikvisionDeviceController;
 use App\Http\Controllers\Hikvision\EventController as HikvisionEventController;
+use App\Http\Controllers\SqlServer\ReportController as SqlServerReportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserController;
 
@@ -60,6 +61,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
         Route::get('users/{user}/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
         Route::put('users/{user}/change-password', [UserController::class, 'updatePassword'])->name('users.change-password.update');
+    });
+
+    Route::prefix('sqlserver')->name('sqlserver.')->group(function () {
+        Route::get('reports/attendance', [SqlServerReportController::class, 'attendance'])->name('reports.attendance');
     });
 
     Route::prefix('hikvision')->name('hikvision.')->group(function () {

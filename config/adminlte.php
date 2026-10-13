@@ -794,6 +794,11 @@ return [
             'url' => 'home',
             'icon' => 'bi bi-speedometer2',
         ],
+        [
+            'text' => 'Attendance Report',
+            'url' => 'sqlserver/reports/attendance',
+            'icon' => 'bi bi-database',
+        ],
         ['header' => 'ZKTeco Attendance'],
         [
             'text' => 'Devices',
