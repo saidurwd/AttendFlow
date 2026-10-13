@@ -10,6 +10,7 @@ use App\Models\SqlServerUser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
@@ -53,6 +54,60 @@ class ReportController extends Controller
         }
         if ($request->filled('department')) {
             $query->where('d.DEPTNAME', $request->department);
+        }
+
+        // Handle CSV export
+        if ($request->has('export')) {
+            $filename = 'attendance_report_' . now()->format('Y-m-d_H-i-s') . '.csv';
+            
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ];
+
+            $callback = function () use ($query, $tz) {
+                $handle = fopen('php://output', 'w');
+                
+                // CSV Headers
+                fputcsv($handle, [
+                    'Date',
+                    'Employee ID',
+                    'Name',
+                    'Department',
+                    'Device',
+                    'Device Serial',
+                    'Clock In',
+                    'Clock Out',
+                    'Total Entries',
+                    'Total Hours'
+                ]);
+
+                // Stream data in chunks to avoid memory issues
+                $query->chunk(500, function ($rows) use ($handle, $tz) {
+                    foreach ($rows as $row) {
+                        $hours = floor($row->total_minutes / 60);
+                        $mins = $row->total_minutes % 60;
+                        $totalHours = sprintf('%02d:%02d', $hours, $mins);
+                        
+                        fputcsv($handle, [
+                            Carbon::parse($row->attendance_date)->timezone($tz)->format('Y-m-d'),
+                            $row->employee_code,
+                            $row->name,
+                            $row->department ?? 'N/A',
+                            $row->device_name ?? 'N/A',
+                            $row->device_serial,
+                            Carbon::parse($row->clock_in)->timezone($tz)->format('H:i:s'),
+                            Carbon::parse($row->clock_out)->timezone($tz)->format('H:i:s'),
+                            $row->total_entries,
+                            $totalHours
+                        ]);
+                    }
+                });
+                
+                fclose($handle);
+            };
+
+            return new StreamedResponse($callback, 200, $headers);
         }
 
         $reports = $query->paginate(50)->withQueryString();
