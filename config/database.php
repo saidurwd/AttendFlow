@@ -102,7 +102,7 @@ return [
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DB_URL'),
-            'host' => env('DB_SQLSERVER_HOST', '172.5.17.119'),
+            'host' => env('DB_SQLSERVER_HOST', '172.17.5.119'),
             'port' => env('DB_SQLSERVER_PORT', '1433'),
             'database' => env('DB_SQLSERVER_DATABASE', 'zkbiotimedpl'),
             'username' => env('DB_SQLSERVER_USERNAME', 'sa'),
@@ -110,8 +110,8 @@ return [
             'charset' => env('DB_SQLSERVER_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'encrypt' => env('DB_SQLSERVER_ENCRYPT', 'yes'),
-            'trust_server_certificate' => env('DB_SQLSERVER_TRUST_SERVER_CERTIFICATE', 'false'),
+            'encrypt' => filter_var(env('DB_SQLSERVER_ENCRYPT', 'yes'), FILTER_VALIDATE_BOOLEAN) ? 'yes' : 'no',
+            'trust_server_certificate' => filter_var(env('DB_SQLSERVER_TRUST_SERVER_CERTIFICATE', 'false'), FILTER_VALIDATE_BOOLEAN) ? 'yes' : 'no',
         ],
 
     ],
